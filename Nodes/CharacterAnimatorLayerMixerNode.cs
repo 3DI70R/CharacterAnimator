@@ -9,7 +9,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 {
     public partial class CharacterAnimator
     {
-        private class LayerMixerNode : CollectionNode<LayerMixerNode.LayerMixerChild>, ILayerMixer
+        private class LayerMixerNodeNode : CollectionNode<LayerMixerNodeNode.LayerMixerChild>, ILayerMixerNode
         {
             public class LayerMixerChildController<T> : ChildController<T, LayerMixerChild>, ILayerMixable<T> 
                 where T : NodeBase
@@ -17,7 +17,11 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 public float Weight
                 {
                     get { return Child.weight; }
-                    set { Child.weight = value; }
+                    set
+                    {
+                        Child.weight = value;
+                        Child.ApplyWeight();
+                    }
                 }
 
                 public float Priority
@@ -61,14 +65,14 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 public float priority;
                 public bool isAdditive;
                 public AvatarMask avatarMask;
-                public LayerMixerNode parentNode;
+                public LayerMixerNodeNode ParentNodeNode;
 
-                public LayerMixerChild(LayerMixerNode parent, NodeBase node) : base(parent, node)
+                public LayerMixerChild(LayerMixerNodeNode parent, NodeBase node) : base(parent, node)
                 {
                     priority = 0;
                     isAdditive = false;
                     avatarMask = emptyMask;
-                    parentNode = parent;
+                    ParentNodeNode = parent;
                 }
                 
                 public void ApplyAvatarMask()
@@ -77,7 +81,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                     {
                         if (c.Key == (int) StreamType.Animation)
                         {
-                            var layerMixer = (AnimationLayerMixerPlayable) parentNode.animationPlayable;
+                            var layerMixer = (AnimationLayerMixerPlayable) ParentNodeNode.animationPlayable;
                             layerMixer.SetLayerMaskFromAvatarMask((uint) c.Value, avatarMask);
                         }
                     }
@@ -89,7 +93,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                     {
                         if (c.Key == (int) StreamType.Animation)
                         {
-                            var layerMixer = (AnimationLayerMixerPlayable) parentNode.animationPlayable;
+                            var layerMixer = (AnimationLayerMixerPlayable) ParentNodeNode.animationPlayable;
                             layerMixer.SetLayerAdditive((uint) c.Value, isAdditive);
                         }
                     }
@@ -104,7 +108,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
                 public void ApplyPriority()
                 {
-                    parentNode.UpdateGraph();
+                    ParentNodeNode.UpdateGraph();
                 }
                 
                 public int CompareTo(object obj)
@@ -113,7 +117,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 }
             }
 
-            public LayerMixerNode(PlayableGraph graph, GameObject owner) : base(graph, owner) { }
+            public LayerMixerNodeNode(PlayableGraph graph, GameObject owner) : base(graph, owner) { }
 
             protected override Playable CreateAnimationPlayable(PlayableGraph graph, GameObject owner)
             {
@@ -131,17 +135,17 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 base.UpdateGraph();
             }
 
-            public ILayerMixable<IMixer> AddMixer(float priority = 0)
+            public ILayerMixable<IMixerNode> AddMixer(float priority = 0)
             {
                 throw new NotImplementedException();
             }
 
-            public ILayerMixable<ILayerMixer> AddLayerMixer(float priority = 0)
+            public ILayerMixable<ILayerMixerNode> AddLayerMixer(float priority = 0)
             {
-                return AddNode(new LayerMixerNode(playableGraph, ownerObject), priority);
+                return AddNode(new LayerMixerNodeNode(playableGraph, ownerObject), priority);
             }
 
-            public ILayerMixable<ISwitcher> AddSwitcher(float priority = 0)
+            public ILayerMixable<ISwitcherNode> AddSwitcher(float priority = 0)
             {
                 return AddNode(new SwitcherNode(playableGraph, ownerObject), priority);
             }
@@ -161,9 +165,11 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 return AddNode(new TimelineNode(playableGraph, ownerObject, tracks), priority);
             }
 
-            public ILayerMixable<IAnimationControllerNode> AddIK(float priority = -1)
+            public ILayerMixable<IAnimationIKNode> AddIK(float priority = -1)
             {
-                throw new NotImplementedException();
+                var node = AddNode(new AnimationIKNode(playableGraph), priority);
+                // TODO: IK mask
+                return node;
             }
             
             private ILayerMixable<T> AddNode<T>(T node, float priority) where T : NodeBase

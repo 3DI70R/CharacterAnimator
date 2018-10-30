@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.Experimental.Animations;
 using UnityEngine.Playables;
 
 namespace ThreeDISevenZeroR.CharacterAnimator
@@ -11,8 +12,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 		private enum StreamType
 		{
 			Unknown = -1,
-			Animation = 0,
-			IK = 1
+			Animation = 0
 		}
 
 		[SerializeField]
@@ -20,11 +20,11 @@ namespace ThreeDISevenZeroR.CharacterAnimator
     
 		private PlayableGraph graph;
 		private AnimationPlayableOutput animationOutput;
-		private LayerMixerNode _rootLayerMixer;
+		private LayerMixerNodeNode rootLayerMixer;
 
-		public ILayerMixer RootLayer
+		public ILayerMixerNode Root
 		{
-			get { return _rootLayerMixer; }
+			get { return rootLayerMixer; }
 		}
 		
 		private void Awake()
@@ -32,8 +32,8 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 			graph = PlayableGraph.Create(graphName);
 			animationOutput = AnimationPlayableOutput.Create(graph, graphName + ".Animation", playableAnimator);
 
-			_rootLayerMixer = new LayerMixerNode(graph, gameObject);
-			AttachOutputs(_rootLayerMixer);
+			rootLayerMixer = new LayerMixerNodeNode(graph, gameObject);
+			AttachOutputs(rootLayerMixer);
    
 			graph.Play();
 		}

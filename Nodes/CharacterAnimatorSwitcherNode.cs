@@ -7,7 +7,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 {
     public partial class CharacterAnimator
     {
-        private class SwitcherNode : CollectionNode<SwitcherNode.SwitcherChild>, ISwitcher
+        private class SwitcherNode : CollectionNode<SwitcherNode.SwitcherChild>, ISwitcherNode
         {
             public class SwitcherChild : CollectionChild
             {
@@ -26,17 +26,17 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 return new SwitcherChild(this, node);
             }
 
-            public ISwitchable<IMixer> AddMixer()
+            public ISwitchable<IMixerNode> AddMixer()
             {
                 throw new System.NotImplementedException();
             }
 
-            public ISwitchable<ILayerMixer> AddLayerMixer()
+            public ISwitchable<ILayerMixerNode> AddLayerMixer()
             {
                 throw new System.NotImplementedException();
             }
 
-            public ISwitchable<ISwitcher> AddSwitcher()
+            public ISwitchable<ISwitcherNode> AddSwitcher()
             {
                 throw new System.NotImplementedException();
             }
@@ -56,7 +56,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 throw new System.NotImplementedException();
             }
 
-            public ISwitchable<IAnimationControllerNode> AddIK()
+            public ISwitchable<IAnimationIKNode> AddIK()
             {
                 throw new System.NotImplementedException();
             }

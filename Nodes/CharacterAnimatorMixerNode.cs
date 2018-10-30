@@ -9,7 +9,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 {
     public partial class CharacterAnimator
     {
-        private class MixerNode : CollectionNode<MixerNode.MixerChild>, IMixer
+        private class MixerNodeNode : CollectionNode<MixerNodeNode.MixerChild>, IMixerNode
         {
             public class MixerChildController<T> : ChildController<T, MixerChild>, IMixable<T> where T : NodeBase
             {
@@ -29,10 +29,10 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
             public class MixerChild : CollectionChild
             {
-                public MixerChild(MixerNode parent, NodeBase node) : base(parent, node) { }
+                public MixerChild(MixerNodeNode parent, NodeBase node) : base(parent, node) { }
             }
 
-            public MixerNode(PlayableGraph graph, GameObject owner) : base(graph, owner) { }
+            public MixerNodeNode(PlayableGraph graph, GameObject owner) : base(graph, owner) { }
 
             protected override Playable CreateAnimationPlayable(PlayableGraph graph, GameObject owner)
             {
@@ -44,39 +44,39 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 return new MixerChild(this, node);
             }
 
-            public IMixable<IMixer> AddMixer(float priority = 0)
+            public IMixable<IMixerNode> AddMixer(float weight = 1)
             {
-                return AddNode(new MixerNode(playableGraph, ownerObject), priority);
+                return AddNode(new MixerNodeNode(playableGraph, ownerObject), weight);
             }
 
-            public IMixable<ILayerMixer> AddLayerMixer(float priority = 0)
+            public IMixable<ILayerMixerNode> AddLayerMixer(float weight = 1)
             {
-                return AddNode(new LayerMixerNode(playableGraph, ownerObject), priority);
+                return AddNode(new LayerMixerNodeNode(playableGraph, ownerObject), weight);
             }
 
-            public IMixable<ISwitcher> AddSwitcher(float priority = 0)
+            public IMixable<ISwitcherNode> AddSwitcher(float weight = 1)
             {
-                return AddNode(new SwitcherNode(playableGraph, ownerObject), priority);
+                return AddNode(new SwitcherNode(playableGraph, ownerObject), weight);
             }
 
-            public IMixable<IAnimationClipNode> AddAnimationClip(AnimationClip c, float priority = 0)
+            public IMixable<IAnimationClipNode> AddAnimationClip(AnimationClip c, float weight = 1)
             {
-                return AddNode(new AnimationClipNode(playableGraph, c), priority);
+                return AddNode(new AnimationClipNode(playableGraph, c), weight);
             }
 
-            public IMixable<IAnimationControllerNode> AddController(RuntimeAnimatorController controller, float priority = 0)
+            public IMixable<IAnimationControllerNode> AddController(RuntimeAnimatorController controller, float weight = 1)
             {
-                return AddNode(new AnimationControllerNode(playableGraph, controller), priority);
+                return AddNode(new AnimationControllerNode(playableGraph, controller), weight);
             }
 
-            public IMixable<ITimelineNode> AddTimelineTrack(IEnumerable<TrackAsset> tracks, float priority = 0)
+            public IMixable<ITimelineNode> AddTimelineTrack(IEnumerable<TrackAsset> tracks, float weight = 1)
             {
-                return AddNode(new TimelineNode(playableGraph, ownerObject, tracks), priority);
+                return AddNode(new TimelineNode(playableGraph, ownerObject, tracks), weight);
             }
 
-            public IMixable<IAnimationControllerNode> AddIK(float priority = -1)
+            public IMixable<IAnimationIKNode> AddIK(float weight = 1)
             {
-                throw new NotImplementedException();
+                return AddNode(new AnimationIKNode(playableGraph), weight);
             }
             
             private IMixable<T> AddNode<T>(T node, float weight) where T : NodeBase
