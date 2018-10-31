@@ -13,6 +13,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
         public IKLimbData.JobData rightHand;
         public IKLimbData.JobData leftFoot;
         public IKLimbData.JobData rightFoot;
+        public IKLookData.JobData look;
         
         public IKInjectJobPlayable(NativeArray<TransformStreamHandle> transforms)
         {
@@ -27,6 +28,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             rightHand = new IKLimbData.JobData();
             leftFoot = new IKLimbData.JobData();
             rightFoot = new IKLimbData.JobData();
+            look = new IKLookData.JobData();
         }
         
         public void ProcessAnimation(AnimationStream output)
@@ -65,7 +67,8 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                     ApplyLimbData(humanOutput, rightFoot, AvatarIKGoal.RightFoot, AvatarIKHint.RightKnee);
                     ApplyLimbData(humanOutput, leftHand, AvatarIKGoal.LeftHand, AvatarIKHint.LeftElbow);
                     ApplyLimbData(humanOutput, rightHand, AvatarIKGoal.RightHand, AvatarIKHint.RightElbow);
- 
+                    ApplyLookData(humanOutput, look);
+                    
                     humanOutput.SolveIK();
                 }
             }
@@ -81,6 +84,15 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             
             stream.SetHintPosition(hint, data.hintPosition);
             stream.SetHintWeightPosition(hint, data.hintWeight);
+        }
+
+        private void ApplyLookData(AnimationHumanStream stream, IKLookData.JobData data)
+        {
+            stream.SetLookAtPosition(data.position);
+            stream.SetLookAtBodyWeight(data.bodyWeight);
+            stream.SetLookAtHeadWeight(data.headWeight);
+            stream.SetLookAtEyesWeight(data.eyesWeight);
+            stream.SetLookAtClampWeight(data.weightClamp);
         }
 
         public void ProcessRootMotion(AnimationStream output)

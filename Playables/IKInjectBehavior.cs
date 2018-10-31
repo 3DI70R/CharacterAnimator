@@ -16,6 +16,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             job.rightHand = rightHand.jobData;
             job.leftFoot = leftFoot.jobData;
             job.rightFoot = rightFoot.jobData;
+            job.look = look.jobData;
             ikInjectPlayable.SetJobData(job);
         }
     }
