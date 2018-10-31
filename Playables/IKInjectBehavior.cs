@@ -1,4 +1,3 @@
-using UnityEngine;
 using UnityEngine.Experimental.Animations;
 using UnityEngine.Playables;
 
@@ -6,21 +5,18 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 {
     public class IKInjectBehavior : IKAnimationBehaviorMixer
     {
-        public override void ProcessFrame(Playable playable, FrameData info, object playerData)
-        {
+        public AnimationScriptPlayable ikInjectPlayable;
 
-        }
-
-        private void ApplyLimbIK(AnimationHumanStream humanStream, AvatarIKGoal goal, AvatarIKHint hint, IKLimbData data)
+        public override void PrepareFrame(Playable playable, FrameData info)
         {
-            humanStream.SetGoalPosition(goal, data.position);
-            humanStream.SetGoalWeightPosition(goal, data.positionWeight);
-			
-            humanStream.SetGoalRotation(goal, data.rotation);
-            humanStream.SetGoalWeightRotation(goal, data.rotationWeight);
-			
-            humanStream.SetHintPosition(hint, data.hintPosition);
-            humanStream.SetHintWeightPosition(hint, data.hintWeight);
+            base.PrepareFrame(playable, info);
+            
+            var job = ikInjectPlayable.GetJobData<IKInjectJobPlayable>();
+            job.leftHand = leftHand.jobData;
+            job.rightHand = rightHand.jobData;
+            job.leftFoot = leftFoot.jobData;
+            job.rightFoot = rightFoot.jobData;
+            ikInjectPlayable.SetJobData(job);
         }
     }
 }

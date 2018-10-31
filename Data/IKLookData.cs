@@ -4,38 +4,43 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 {
     public class IKLookData
     {
-        public float eyesWeight;
-        public float headWeight;
-        public float bodyWeight;
-        public float weightClamp;
+        public struct JobData
+        {
+            public float eyesWeight;
+            public float headWeight;
+            public float bodyWeight;
+            public float weightClamp;
 
-        public Vector3 position;
+            public Vector3 position;
+        }
+
+        public JobData jobData;
 
         public void Reset()
         {
-            eyesWeight = 0f;
-            headWeight = 0f;
-            bodyWeight = 0f;
-            weightClamp = 0f;
-            position = Vector3.zero;
+            jobData.eyesWeight = 0f;
+            jobData.headWeight = 0f;
+            jobData.bodyWeight = 0f;
+            jobData.weightClamp = 0f;
+            jobData.position = Vector3.zero;
         }
 
         public void Mix(IKLookData data, float weight)
         {
-            eyesWeight = Mathf.LerpUnclamped(eyesWeight, data.eyesWeight, weight);
-            headWeight = Mathf.LerpUnclamped(headWeight, data.headWeight, weight);
-            bodyWeight = Mathf.LerpUnclamped(bodyWeight, data.bodyWeight, weight);
-            weightClamp = Mathf.LerpUnclamped(weightClamp, data.weightClamp, weight);
-            position = Vector3.LerpUnclamped(position, data.position, weight);
+            jobData.eyesWeight = Mathf.LerpUnclamped(jobData.eyesWeight, data.jobData.eyesWeight, weight);
+            jobData.headWeight = Mathf.LerpUnclamped(jobData.headWeight, data.jobData.headWeight, weight);
+            jobData.bodyWeight = Mathf.LerpUnclamped(jobData.bodyWeight, data.jobData.bodyWeight, weight);
+            jobData.weightClamp = Mathf.LerpUnclamped(jobData.weightClamp, data.jobData.weightClamp, weight);
+            jobData.position = Vector3.LerpUnclamped(jobData.position, data.jobData.position, weight);
         }
 
         public void Add(IKLookData data, float weight)
         {
-            eyesWeight += data.eyesWeight * weight;
-            headWeight += data.headWeight * weight;
-            bodyWeight += data.bodyWeight * weight;
-            weightClamp += data.weightClamp * weight;
-            position += data.position * weight;
+            jobData.eyesWeight += data.jobData.eyesWeight * weight;
+            jobData.headWeight += data.jobData.headWeight * weight;
+            jobData.bodyWeight += data.jobData.bodyWeight * weight;
+            jobData.weightClamp += data.jobData.weightClamp * weight;
+            jobData.position += data.jobData.position * weight;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Unity.Collections;
+﻿﻿using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Experimental.Animations;
@@ -30,29 +30,28 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
 		public ILayerMixerNode Root => rootLayerMixer;
 
-		private NativeArray<TransformStreamHandle> sceneTransforms;
+		private NativeArray<TransformStreamHandle> streamTransforms;
 
 		private void Awake()
 		{
 			graph = PlayableGraph.Create(graphName);
 			graph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
 
-			sceneTransforms = GetStreamHandles();
+			streamTransforms = GetStreamHandles();
 
-			var job = new IKInjectJobPlayable
-			{
-				transforms = sceneTransforms
-			};
-
+			var job = new IKInjectJobPlayable(streamTransforms);
 			ikInjectPlayable = AnimationScriptPlayable.Create(graph, job, 1);
 			ikInjectPlayable.SetProcessInputs(false);
 			
 			animationOutput = AnimationPlayableOutput.Create(graph, graphName + ".Animation", playableAnimator);
 			animationOutput.SetSourcePlayable(ikInjectPlayable);
 
-			/*ikScriptOutput = ScriptPlayableOutput.Create(graph, graphName + ".IK");
+			ikScriptOutput = ScriptPlayableOutput.Create(graph, graphName + ".IK");
+			ikOutput = ScriptPlayable<IKInjectBehavior>.Create(graph, new IKInjectBehavior
+			{
+				ikInjectPlayable = ikInjectPlayable
+			});
 			ikScriptOutput.SetSourcePlayable(ikOutput);
-			ikScriptOutput.SetUserData(playableAnimator);*/
 
 			rootLayerMixer = new LayerMixerNode(graph, gameObject);
 			AttachOutputs(rootLayerMixer);
@@ -91,9 +90,9 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 						ikInjectPlayable.AddInput(playable, i, 1f);
 						break;
 					
-					/*case StreamType.IK:
+					case StreamType.IK:
 						ikOutput.AddInput(playable, i, 1f);
-						break;*/
+						break;
 				}
 			}
 		}
@@ -101,6 +100,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 		private void OnDestroy()
 		{
 			graph.Destroy();
+			streamTransforms.Dispose();
 		}
 	}
 }

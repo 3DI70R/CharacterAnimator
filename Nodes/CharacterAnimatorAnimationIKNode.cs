@@ -14,85 +14,85 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
             private class IKLook : IIKLook
             {
-                private IKLookData jobData;
+                private IKLookData data;
 
                 public IKLook(IKLookData node)
                 {
-                    jobData = node;
+                    data = node;
                 }
 
                 public float EyesWeight
                 {
-                    get { return jobData.eyesWeight; }
-                    set { jobData.eyesWeight = value; }
+                    get { return data.jobData.eyesWeight; }
+                    set { data.jobData.eyesWeight = value; }
                 }
 
                 public float HeadWeight
                 {
-                    get { return jobData.headWeight; }
-                    set { jobData.headWeight = value; }
+                    get { return data.jobData.headWeight; }
+                    set { data.jobData.headWeight = value; }
                 }
 
                 public float BodyWeight
                 {
-                    get { return jobData.bodyWeight; }
-                    set { jobData.bodyWeight = value; }
+                    get { return data.jobData.bodyWeight; }
+                    set { data.jobData.bodyWeight = value; }
                 }
 
                 public float WeightClamp
                 {
-                    get { return jobData.weightClamp; }
-                    set { jobData.weightClamp = value; }
+                    get { return data.jobData.weightClamp; }
+                    set { data.jobData.weightClamp = value; }
                 }
                 public Vector3 Position
                 {
-                    get { return jobData.position; }
-                    set { jobData.position = value; }
+                    get { return data.jobData.position; }
+                    set { data.jobData.position = value; }
                 }
             }
 
             private class IKLimb : IIKLimb
             {
-                private IKLimbData jobData;
+                private IKLimbData data;
 
                 public IKLimb(IKLimbData data)
                 {
-                    jobData = data;
+                    this.data = data;
                 }
 
                 public float PositionWeight
                 {
-                    get { return jobData.positionWeight; }
-                    set { jobData.positionWeight = value; }
+                    get { return data.jobData.positionWeight; }
+                    set { data.jobData.positionWeight = value; }
                 }
 
                 public float RotationWeight
                 {
-                    get { return jobData.rotationWeight; }
-                    set {  jobData.rotationWeight = value; }
+                    get { return data.jobData.rotationWeight; }
+                    set {  data.jobData.rotationWeight = value; }
                 }
                 public float HintWeight 
                 { 
-                    get { return jobData.hintWeight; }
-                    set { jobData.hintWeight = value; }
+                    get { return data.jobData.hintWeight; }
+                    set { data.jobData.hintWeight = value; }
                 }
 
                 public Vector3 Position
                 {
-                    get { return jobData.position; }
-                    set { jobData.position = value; }
+                    get { return data.jobData.position; }
+                    set { data.jobData.position = value; }
                 }
 
                 public Quaternion Rotation
                 {
-                    get { return jobData.rotation; }
-                    set { jobData.rotation = value; }
+                    get { return data.jobData.rotation; }
+                    set { data.jobData.rotation = value; }
                 }
 
                 public Vector3 HintPosition
                 {
-                    get { return jobData.hintPosition; }
-                    set { jobData.hintPosition = value; }
+                    get { return data.jobData.hintPosition; }
+                    set { data.jobData.hintPosition = value; }
                 }
             }
 
