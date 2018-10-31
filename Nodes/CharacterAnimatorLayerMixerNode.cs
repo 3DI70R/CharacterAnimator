@@ -9,7 +9,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 {
     public partial class CharacterAnimator
     {
-        private class LayerMixerNodeNode : CollectionNode<LayerMixerNodeNode.LayerMixerChild>, ILayerMixerNode
+        private class LayerMixerNode : CollectionNode<LayerMixerNode.LayerMixerChild>, ILayerMixerNode
         {
             public class LayerMixerChildController<T> : ChildController<T, LayerMixerChild>, ILayerMixable<T> 
                 where T : NodeBase
@@ -65,14 +65,14 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 public float priority;
                 public bool isAdditive;
                 public AvatarMask avatarMask;
-                public LayerMixerNodeNode ParentNodeNode;
+                public LayerMixerNode ParentNode;
 
-                public LayerMixerChild(LayerMixerNodeNode parent, NodeBase node) : base(parent, node)
+                public LayerMixerChild(LayerMixerNode parent, NodeBase node) : base(parent, node)
                 {
                     priority = 0;
                     isAdditive = false;
                     avatarMask = emptyMask;
-                    ParentNodeNode = parent;
+                    ParentNode = parent;
                 }
                 
                 public void ApplyAvatarMask()
@@ -81,7 +81,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                     {
                         if (c.Key == (int) StreamType.Animation)
                         {
-                            var layerMixer = (AnimationLayerMixerPlayable) ParentNodeNode.animationPlayable;
+                            var layerMixer = (AnimationLayerMixerPlayable) ParentNode.animationPlayable;
                             layerMixer.SetLayerMaskFromAvatarMask((uint) c.Value, avatarMask);
                         }
                     }
@@ -93,8 +93,13 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                     {
                         if (c.Key == (int) StreamType.Animation)
                         {
-                            var layerMixer = (AnimationLayerMixerPlayable) ParentNodeNode.animationPlayable;
+                            var layerMixer = (AnimationLayerMixerPlayable) ParentNode.animationPlayable;
                             layerMixer.SetLayerAdditive((uint) c.Value, isAdditive);
+                        }
+                        else if (c.Key == (int) StreamType.IK)
+                        {
+                            var ikMixer = (ScriptPlayable<IKAnimationBehaviorLayerMixer>) ParentNode.ikPlayable;
+                            ikMixer.GetBehaviour().SetLayerAdditive(c.Value, isAdditive);
                         }
                     }
                 }
@@ -108,7 +113,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
                 public void ApplyPriority()
                 {
-                    ParentNodeNode.UpdateGraph();
+                    ParentNode.UpdateGraph();
                 }
                 
                 public int CompareTo(object obj)
@@ -117,11 +122,16 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 }
             }
 
-            public LayerMixerNodeNode(PlayableGraph graph, GameObject owner) : base(graph, owner) { }
+            public LayerMixerNode(PlayableGraph graph, GameObject owner) : base(graph, owner) { }
 
             protected override Playable CreateAnimationPlayable(PlayableGraph graph, GameObject owner)
             {
                 return AnimationLayerMixerPlayable.Create(graph);
+            }
+
+            protected override Playable CreateIKPlayable(PlayableGraph graph, GameObject owner)
+            {
+                return ScriptPlayable<IKAnimationBehaviorLayerMixer>.Create(graph);
             }
 
             protected override LayerMixerChild CreateContainer(NodeBase node)
@@ -142,7 +152,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
             public ILayerMixable<ILayerMixerNode> AddLayerMixer(float priority = 0)
             {
-                return AddNode(new LayerMixerNodeNode(playableGraph, ownerObject), priority);
+                return AddNode(new LayerMixerNode(playableGraph, ownerObject), priority);
             }
 
             public ILayerMixable<ISwitcherNode> AddSwitcher(float priority = 0)

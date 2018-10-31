@@ -6,7 +6,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 	{
 		private abstract class NodeBase : INode
 		{
-			private double speed;
+			private double speed = 1.0;
 
 			public abstract Playable Playable { get; }
 			public abstract StreamType[] OutputTypes { get; }

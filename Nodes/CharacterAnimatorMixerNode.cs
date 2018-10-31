@@ -51,7 +51,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
             public IMixable<ILayerMixerNode> AddLayerMixer(float weight = 1)
             {
-                return AddNode(new LayerMixerNodeNode(playableGraph, ownerObject), weight);
+                return AddNode(new LayerMixerNode(playableGraph, ownerObject), weight);
             }
 
             public IMixable<ISwitcherNode> AddSwitcher(float weight = 1)

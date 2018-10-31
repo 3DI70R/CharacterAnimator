@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Collections;
+using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Experimental.Animations;
 using UnityEngine.Playables;
@@ -12,7 +13,8 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 		private enum StreamType
 		{
 			Unknown = -1,
-			Animation = 0
+			Animation = 0,
+			IK = 1
 		}
 
 		[SerializeField]
@@ -20,22 +22,58 @@ namespace ThreeDISevenZeroR.CharacterAnimator
     
 		private PlayableGraph graph;
 		private AnimationPlayableOutput animationOutput;
-		private LayerMixerNodeNode rootLayerMixer;
+		private AnimationScriptPlayable ikInjectPlayable;
+		private ScriptPlayable<IKInjectBehavior> ikOutput;
 
-		public ILayerMixerNode Root
-		{
-			get { return rootLayerMixer; }
-		}
-		
+		private ScriptPlayableOutput ikScriptOutput;
+		private LayerMixerNode rootLayerMixer;
+
+		public ILayerMixerNode Root => rootLayerMixer;
+
+		private NativeArray<TransformStreamHandle> sceneTransforms;
+
 		private void Awake()
 		{
 			graph = PlayableGraph.Create(graphName);
-			animationOutput = AnimationPlayableOutput.Create(graph, graphName + ".Animation", playableAnimator);
+			graph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
 
-			rootLayerMixer = new LayerMixerNodeNode(graph, gameObject);
+			sceneTransforms = GetStreamHandles();
+
+			var job = new IKInjectJobPlayable
+			{
+				transforms = sceneTransforms
+			};
+
+			ikInjectPlayable = AnimationScriptPlayable.Create(graph, job, 1);
+			ikInjectPlayable.SetProcessInputs(false);
+			
+			animationOutput = AnimationPlayableOutput.Create(graph, graphName + ".Animation", playableAnimator);
+			animationOutput.SetSourcePlayable(ikInjectPlayable);
+
+			/*ikScriptOutput = ScriptPlayableOutput.Create(graph, graphName + ".IK");
+			ikScriptOutput.SetSourcePlayable(ikOutput);
+			ikScriptOutput.SetUserData(playableAnimator);*/
+
+			rootLayerMixer = new LayerMixerNode(graph, gameObject);
 			AttachOutputs(rootLayerMixer);
    
 			graph.Play();
+		}
+
+		private NativeArray<TransformStreamHandle> GetStreamHandles()
+		{
+			var transforms = GetComponentsInChildren<Transform>();
+			var transformCount = transforms.Length - 1;
+			var handles = new NativeArray<TransformStreamHandle>(transformCount, 
+				Allocator.Persistent, 
+				NativeArrayOptions.UninitializedMemory);
+			
+			for (var i = 0; i < transformCount; ++i)
+			{
+				handles[i] = playableAnimator.BindStreamTransform(transforms[i + 1]);
+			}
+
+			return handles;
 		}
 
 		private void AttachOutputs(NodeBase node)
@@ -50,12 +88,16 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 				switch (t)
 				{
 					case StreamType.Animation:
-						animationOutput.SetSourcePlayable(playable, i);
+						ikInjectPlayable.AddInput(playable, i, 1f);
 						break;
+					
+					/*case StreamType.IK:
+						ikOutput.AddInput(playable, i, 1f);
+						break;*/
 				}
 			}
 		}
-
+		
 		private void OnDestroy()
 		{
 			graph.Destroy();

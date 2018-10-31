@@ -15,7 +15,8 @@ namespace ThreeDISevenZeroR.CharacterAnimator
         {
             private static readonly StreamType[] mixerOutputTypes =
             {
-                StreamType.Animation
+                StreamType.Animation,
+                StreamType.IK
             };
 
             public abstract class ChildController<N, C> : IChild<N>
@@ -80,8 +81,9 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             protected List<T> childNodes;
             protected GameObject ownerObject;
             protected PlayableGraph playableGraph;
-            protected Playable passtroughNode;
+            protected Playable passtroughPlayable;
             protected Playable animationPlayable;
+            protected Playable ikPlayable;
             protected Playable[] playables;
             
             public CollectionNode(PlayableGraph graph, GameObject owner)
@@ -90,16 +92,20 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 ownerObject = owner;
                 childNodes = new List<T>();
 
-                passtroughNode = Playable.Create(graph, mixerOutputTypes.Length);
-                passtroughNode.SetOutputCount(mixerOutputTypes.Length);
-                passtroughNode.SetTraversalMode(PlayableTraversalMode.Passthrough);
+                passtroughPlayable = Playable.Create(graph, mixerOutputTypes.Length);
+                passtroughPlayable.SetOutputCount(mixerOutputTypes.Length);
+                passtroughPlayable.SetTraversalMode(PlayableTraversalMode.Passthrough);
 
                 animationPlayable = CreateAnimationPlayable(graph, owner);
-                passtroughNode.ConnectInput(0, animationPlayable, 0, 1f);
+                passtroughPlayable.ConnectInput(0, animationPlayable, 0, 1f);
+
+                ikPlayable = CreateIKPlayable(graph, owner);
+                passtroughPlayable.ConnectInput(1, ikPlayable, 0, 1f);
                 
                 playables = new[]
                 {
-                    animationPlayable
+                    animationPlayable,
+                    ikPlayable
                 };
             }
 
@@ -107,10 +113,15 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             {
                 return AnimationMixerPlayable.Create(graph);
             }
+            
+            protected virtual Playable CreateIKPlayable(PlayableGraph graph, GameObject owner)
+            {
+                return ScriptPlayable<IKAnimationBehaviorMixer>.Create(graph);
+            }
 
             public override Playable Playable
             {
-                get { return animationPlayable; }
+                get { return passtroughPlayable; }
             }
 
             public override StreamType[] OutputTypes
@@ -149,8 +160,10 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             protected virtual void UpdateGraph()
             {
                 var animationInput = 0;
+                var ikInput = 0;
 
                 DisconnectAllInputs(animationPlayable);
+                DisconnectAllInputs(ikPlayable);
 
                 foreach (var child in childNodes)
                 {
@@ -171,6 +184,13 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                                 animationInput++;
                                 break;
                             
+                            case StreamType.IK:
+                                PrepareInputForConnection(ikPlayable, ikInput);
+                                ikPlayable.ConnectInput(ikInput, playable, o);
+                                child.connections.Add(new KeyValuePair<int, int>(1, ikInput));
+                                ikInput++;
+                                break;
+                            
                             default:
                                 Debug.LogError("Unknown output type encountered: " + outputTypes[o]);
                                 break;
@@ -181,6 +201,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 }
 
                 RemoveUnusedInputs(animationPlayable, animationInput);
+                RemoveUnusedInputs(ikPlayable, ikInput);
             }
 
             private void PrepareInputForConnection(Playable playable, int index)
