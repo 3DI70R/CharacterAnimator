@@ -3,21 +3,21 @@ using UnityEngine.Playables;
 
 namespace ThreeDISevenZeroR.CharacterAnimator
 {
-    public class IKInjectBehavior : IKAnimationBehaviorMixer
+    public class IKAnimationOutputBehavior : IKAnimationBehaviorMixer
     {
-        public AnimationScriptPlayable ikInjectPlayable;
+        public AnimationScriptPlayable postprocess;
 
         public override void PrepareFrame(Playable playable, FrameData info)
         {
             base.PrepareFrame(playable, info);
             
-            var job = ikInjectPlayable.GetJobData<IKInjectJobPlayable>();
+            var job = postprocess.GetJobData<AnimationIKApplyJobPlayable>();
             job.leftHand = leftHand.jobData;
             job.rightHand = rightHand.jobData;
             job.leftFoot = leftFoot.jobData;
             job.rightFoot = rightFoot.jobData;
             job.look = look.jobData;
-            ikInjectPlayable.SetJobData(job);
+            postprocess.SetJobData(job);
         }
     }
 }

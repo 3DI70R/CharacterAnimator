@@ -38,26 +38,24 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             rightFoot.Mix(playable.rightFoot, weight);
         }
 
-        protected IKAnimationBehavior GetIkFromInput(Playable p, int i)
+        protected ScriptPlayable<IKAnimationBehavior> GetIkFromInput(Playable p, int i)
         {
             var input = p.GetInput(i);
 
             if (typeof(IKAnimationBehavior).IsAssignableFrom(input.GetPlayableType()))
             {
-                var inputIkPlayable = (ScriptPlayable<IKAnimationBehavior>) input;
-                return inputIkPlayable.GetBehaviour();
-            }
-            
-            // TODO: Passtrough node hides original input
-            // Investigate for better solutions
-            var inputChild = input.GetInput(1);
-            if (typeof(IKAnimationBehavior).IsAssignableFrom(inputChild.GetPlayableType()))
-            {
-                var inputIkPlayable = (ScriptPlayable<IKAnimationBehavior>) inputChild;
-                return inputIkPlayable.GetBehaviour();
+                return (ScriptPlayable<IKAnimationBehavior>) input;
             }
 
-            return null;
+            // TODO: Passtrough node hides original input
+            // Animation playable seems to have no problems with finding inputs
+            var inputChild = input.GetInput(i);
+            if (typeof(IKAnimationBehavior).IsAssignableFrom(inputChild.GetPlayableType()))
+            {
+                return (ScriptPlayable<IKAnimationBehavior>) inputChild;
+            }
+
+            return ScriptPlayable<IKAnimationBehavior>.Null;
         }
     }
 }

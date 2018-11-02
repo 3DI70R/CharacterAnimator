@@ -9,7 +9,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 {
     public partial class CharacterAnimator
     {
-        private class MixerNodeNode : CollectionNode<MixerNodeNode.MixerChild>, IMixerNode
+        private class MixerNode : CollectionNode<MixerNode.MixerChild>, IMixerNode
         {
             public class MixerChildController<T> : ChildController<T, MixerChild>, IMixable<T> where T : NodeBase
             {
@@ -29,10 +29,10 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
             public class MixerChild : CollectionChild
             {
-                public MixerChild(MixerNodeNode parent, NodeBase node) : base(parent, node) { }
+                public MixerChild(MixerNode parent, NodeBase node) : base(parent, node) { }
             }
 
-            public MixerNodeNode(PlayableGraph graph, GameObject owner) : base(graph, owner) { }
+            public MixerNode(PlayableGraph graph, GameObject owner) : base(graph, owner) { }
 
             protected override Playable CreateAnimationPlayable(PlayableGraph graph, GameObject owner)
             {
@@ -46,7 +46,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
             public IMixable<IMixerNode> AddMixer(float weight = 1)
             {
-                return AddNode(new MixerNodeNode(playableGraph, ownerObject), weight);
+                return AddNode(new MixerNode(playableGraph, ownerObject), weight);
             }
 
             public IMixable<ILayerMixerNode> AddLayerMixer(float weight = 1)
@@ -81,7 +81,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             
             private IMixable<T> AddNode<T>(T node, float weight) where T : NodeBase
             {
-                return new MixerChildController<T>(this, node, Connect(node))
+                return new MixerChildController<T>(this, node, CreateChild(node))
                 {
                     Weight = weight
                 };

@@ -25,8 +25,8 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             {
                 private CollectionNode<T> parent;
 
-                public N Node { get; private set; }
-                public C Child { get; private set; }
+                public N Node { get; }
+                public C Child { get; }
 
                 public ChildController(CollectionNode<T> parent, N node, C child)
                 {
@@ -37,7 +37,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 
                 public void Remove()
                 {
-                    parent.Disconnect(Node);
+                    parent.DestroyChild(Node);
                 }
             }
 
@@ -119,17 +119,10 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                 return ScriptPlayable<IKAnimationBehaviorMixer>.Create(graph);
             }
 
-            public override Playable Playable
-            {
-                get { return passtroughPlayable; }
-            }
+            public override Playable Playable => passtroughPlayable;
+            public override StreamType[] OutputTypes => mixerOutputTypes;
 
-            public override StreamType[] OutputTypes
-            {
-                get { return mixerOutputTypes; }
-            }
-
-            public T Connect(NodeBase node)
+            public T CreateChild(NodeBase node)
             {
                 var index = GetNodeIndex(node);
 
@@ -146,13 +139,15 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
             protected abstract T CreateContainer(NodeBase node);
 
-            public void Disconnect(NodeBase node)
+            public void DestroyChild(NodeBase node)
             {
                 var index = GetNodeIndex(node);
 
                 if (index >= 0)
                 {
+                    var child = childNodes[index];
                     childNodes.RemoveAt(index);
+                    playableGraph.DestroySubgraph(child.node.Playable);
                     UpdateGraph();
                 }
             }
@@ -180,14 +175,14 @@ namespace ThreeDISevenZeroR.CharacterAnimator
                             case StreamType.Animation:
                                 PrepareInputForConnection(animationPlayable, animationInput);
                                 animationPlayable.ConnectInput(animationInput, playable, o);
-                                child.connections.Add(new KeyValuePair<int, int>(0, animationInput));
+                                child.connections.Add(new KeyValuePair<int, int>((int) StreamType.Animation, animationInput));
                                 animationInput++;
                                 break;
                             
                             case StreamType.IK:
                                 PrepareInputForConnection(ikPlayable, ikInput);
                                 ikPlayable.ConnectInput(ikInput, playable, o);
-                                child.connections.Add(new KeyValuePair<int, int>(1, ikInput));
+                                child.connections.Add(new KeyValuePair<int, int>((int) StreamType.IK, ikInput));
                                 ikInput++;
                                 break;
                             

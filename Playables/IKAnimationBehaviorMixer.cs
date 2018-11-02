@@ -9,7 +9,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
         public override void PrepareFrame(Playable playable, FrameData info)
         {
             Reset();
-
+ 
             var inputCount = playable.GetInputCount();
             var weightSum = 0f;
 
@@ -17,7 +17,10 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             {
                 for (var i = 0; i < inputCount; i++)
                 {
-                    weightSum += playable.GetInputWeight(i);
+                    if (GetIkFromInput(playable, i).IsValid())
+                    {
+                        weightSum += playable.GetInputWeight(i);
+                    }
                 }
             }
             else
@@ -33,10 +36,13 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
                     if (weight > 0)
                     {
-                        var behavior = GetIkFromInput(playable, i);
-                        
-                        if (behavior != null)
+                        var ikPlayable = GetIkFromInput(playable, i);
+
+                        if (ikPlayable.IsValid())
                         {
+                            var behavior = ikPlayable.GetBehaviour();
+                            // TODO: Need to investigate, how to prepare frames in input before evaluating mixer
+                            behavior.PrepareFrame(ikPlayable, info);
                             Add(behavior, weight / weightSum);
                         }
                     }

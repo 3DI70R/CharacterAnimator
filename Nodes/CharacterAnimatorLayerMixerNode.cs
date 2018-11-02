@@ -147,7 +147,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
             public ILayerMixable<IMixerNode> AddMixer(float priority = 0)
             {
-                throw new NotImplementedException();
+                return AddNode(new MixerNode(playableGraph, ownerObject), priority);
             }
 
             public ILayerMixable<ILayerMixerNode> AddLayerMixer(float priority = 0)
@@ -184,7 +184,7 @@ namespace ThreeDISevenZeroR.CharacterAnimator
             
             private ILayerMixable<T> AddNode<T>(T node, float priority) where T : NodeBase
             {
-                return new LayerMixerChildController<T>(this, node, Connect(node))
+                return new LayerMixerChildController<T>(this, node, CreateChild(node))
                 {
                     Priority = priority
                 };

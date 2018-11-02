@@ -36,10 +36,14 @@ namespace ThreeDISevenZeroR.CharacterAnimator
 
                 if (weight > 0)
                 {
-                    var behavior = GetIkFromInput(playable, i);
+                    var ikPlayable = GetIkFromInput(playable, i);
                     
-                    if (behavior != null)
+                    if (ikPlayable.IsValid())
                     {
+                        var behavior = ikPlayable.GetBehaviour();
+                        // TODO: Need to investigate, how to prepare frames in input before evaluating mixer
+                        behavior.PrepareFrame(ikPlayable, info);
+                        
                         if (GetLayerAdditive(i))
                         {
                             Add(behavior, weight);
